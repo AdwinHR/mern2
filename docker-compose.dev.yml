@@ -1,0 +1,50 @@
+services:
+  mongo:
+    image: mongo:6
+    container_name: portfolio-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: portfolio-backend
+    command: npm run dev
+    environment:
+      - PORT=5001
+      - MONGODB_URI=mongodb://mongo:27017/portfolio
+      - NODE_ENV=development
+    ports:
+      - "5002:5001"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    depends_on:
+      - mongo
+
+  frontend:
+    image: node:20-alpine
+    working_dir: /app
+    container_name: portfolio-frontend
+    command: sh -c "npm install && npm start"
+    environment:
+      - PORT=3000
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      - REACT_APP_API_URL=http://localhost:5002/api
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  mongo_data:
+
+

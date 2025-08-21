@@ -34,7 +34,7 @@ app.get("/api/health", (req, res) => {
 // MongoDB Connection
 const connectDB = async () => {
   try {
-    const mongoURI = process.env.MONGODB_URI || "mongodb://localhost:27017/portfolio"
+    const mongoURI = process.env.MONGODB_URI || "mongodb+srv://adwin25hr:hrA%406600@first.ofisccr.mongodb.net/portfolio"
     console.log("Attempting to connect to MongoDB:", mongoURI)
 
     await mongoose.connect(mongoURI, {
