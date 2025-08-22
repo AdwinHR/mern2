@@ -1,0 +1,16 @@
+# Frontend Dockerfile for Pre-built App (Fast Deployment)
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install serve globally
+RUN npm install -g serve
+
+# Copy the pre-built app
+COPY build/ ./build/
+
+# Expose port
+EXPOSE 3000
+
+# Serve the static files
+CMD ["serve", "-s", "build", "-l", "3000"]
