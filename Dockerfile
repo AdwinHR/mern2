@@ -1,15 +1,27 @@
-# Frontend Dockerfile (Create React App)
+# Frontend Dockerfile (Create React App) - Optimized
 FROM node:20-alpine AS deps
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
+RUN npm ci --only=production && npm cache clean --force
 
 FROM node:20-alpine AS builder
 WORKDIR /app
 ARG REACT_APP_API_URL
 ENV REACT_APP_API_URL=$REACT_APP_API_URL
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+
+# Copy package files first for better caching
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Copy source code
+COPY public/ ./public/
+COPY src/ ./src/
+COPY tsconfig.json ./
+COPY tailwind.config.js ./
+COPY postcss.config.mjs ./
+COPY next.config.mjs ./
+
+# Build the app
 RUN npm run build
 
 FROM node:20-alpine AS runner
