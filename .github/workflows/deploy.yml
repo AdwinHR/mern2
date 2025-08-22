@@ -1,0 +1,52 @@
+name: Build and Deploy to EC2
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Build React app
+      run: npm run build
+      
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.8.0
+      with:
+        ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+        
+    - name: Deploy to EC2
+      run: |
+        # Create deployment directory
+        ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} "mkdir -p ~/mern2"
+        
+        # Copy build folder
+        scp -r build/ ec2-user@${{ secrets.EC2_HOST }}:~/mern2/
+        
+        # Copy deployment files
+        scp Dockerfile.local ec2-user@${{ secrets.EC2_HOST }}:~/mern2/
+        scp docker-compose.local.yml ec2-user@${{ secrets.EC2_HOST }}:~/mern2/
+        scp scripts/deploy-fast.sh ec2-user@${{ secrets.EC2_HOST }}:~/mern2/
+        
+        # Deploy on EC2
+        ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} "cd ~/mern2 && chmod +x scripts/deploy-fast.sh && ./scripts/deploy-fast.sh"
+        
+    - name: Deploy Status
+      run: |
+        echo "✅ Deployment completed successfully!"
+        echo "🌐 Your app is now available at: http://${{ secrets.EC2_HOST }}"
