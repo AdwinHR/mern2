@@ -1,17 +1,23 @@
 node_modules
 npm-debug.log
-Dockerfile*
-docker-compose*
 .git
 .gitignore
-.DS_Store
-build
-dist
-.next
-.cache
+README.md
+.env
+.nyc_output
 coverage
-**/*.local
-**/*.env
-.env*
+.cache
+.parcel-cache
+.next
+.nuxt
+dist
+build
+.DS_Store
+*.log
+.vscode
+.idea
+*.swp
+*.swo
+*~
 
 
